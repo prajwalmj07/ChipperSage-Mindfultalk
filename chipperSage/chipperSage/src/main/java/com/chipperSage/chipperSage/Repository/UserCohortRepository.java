@@ -41,6 +41,63 @@ public interface UserCohortRepository extends JpaRepository<UserCohort, Integer>
             "WHERE p.programId = :programId " +
             "GROUP BY u.id, p.programName")
     List<Object[]> findStudentProgressByProgram(@Param("programId") int programId);
+    //lines added by revankar
+    @Query(value = "SELECT c.cohort_name, u.user_id, u.user_name, " +
+            "COUNT(usc.sub_concept_id) AS completed_sub_concepts, " +
+            "COUNT(sc.sub_concept_id) AS total_sub_concepts, " +
+            "(COUNT(usc.sub_concept_id) / COUNT(sc.sub_concept_id)) * 100 AS progress_percentage, " +
+            "CASE WHEN MAX(us.session_end_timestamp) >= NOW() - INTERVAL 1 MONTH THEN 'Active' ELSE 'Inactive' END AS user_status " +
+            "FROM user u " +
+            "JOIN user_cohort uc ON u.user_id = uc.user_id " +
+            "JOIN cohort c ON uc.cohort_id = c.cohort_id " +
+            "JOIN cohort_program cp ON c.cohort_id = cp.cohort_id " +
+            "JOIN program p ON cp.program_id = p.program_id " +
+            "JOIN program_sub_concept ps ON p.program_id = ps.program_id " +
+            "JOIN sub_concept sc ON ps.sub_concept_id = sc.sub_concept_id " +
+            "LEFT JOIN user_sub_concept_completion usc ON u.user_id = usc.user_id AND usc.sub_concept_id = sc.sub_concept_id " +
+            "LEFT JOIN user_session us ON u.user_id = us.user_id " +
+            "WHERE p.program_id = :programId " +
+            "GROUP BY c.cohort_name, u.user_id " +
+            "HAVING user_status = 'Active'", nativeQuery = true)
+    List<Object[]> findCohortProgressByProgram(@Param("programId") int programId);
 
+    @Query(value = "SELECT c.cohort_name, u.user_id, u.user_name, " +
+            "COUNT(usc.sub_concept_id) AS completed_sub_concepts, " +
+            "COUNT(sc.sub_concept_id) AS total_sub_concepts, " +
+            "(COUNT(usc.sub_concept_id) * 1.0 / COUNT(sc.sub_concept_id)) * 100 AS progress_percentage, " +
+            "'Inactive' AS user_status " +
+            "FROM user u " +
+            "JOIN user_cohort uc ON u.user_id = uc.user_id " +
+            "JOIN cohort c ON uc.cohort_id = c.cohort_id " +
+            "JOIN cohort_program cp ON c.cohort_id = cp.cohort_id " +
+            "JOIN program p ON cp.program_id = p.program_id " +
+            "JOIN program_subconcept ps ON p.program_id = ps.program_id " +
+            "JOIN sub_concept sc ON ps.sub_concept_id = sc.sub_concept_id " +
+            "LEFT JOIN user_subconcept_completion usc ON u.user_id = usc.user_id AND usc.sub_concept_id = sc.sub_concept_id " +
+            "LEFT JOIN user_session us ON u.user_id = us.user_id " +
+            "WHERE p.program_id = :programId " +
+            "GROUP BY c.cohort_name, u.user_id, u.user_name " +
+            "HAVING MAX(us.session_end_timestamp) < CURRENT_DATE - INTERVAL 30 DAY OR MAX(us.session_end_timestamp) IS NULL",
+            nativeQuery = true)
+    List<Object[]> findInactiveCohortProgressByProgram(@Param("programId") int programId);
+
+    @Query(value = "SELECT c.cohort_name, u.user_id, u.user_name, " +
+            "COUNT(usc.sub_concept_id) AS completed_sub_concepts, " +
+            "COUNT(sc.sub_concept_id) AS total_sub_concepts, " +
+            "(COUNT(usc.sub_concept_id) * 100.0 / COUNT(sc.sub_concept_id)) AS completion_percentage " +
+            "FROM user u " +
+            "JOIN user_cohort uc ON u.user_id = uc.user_id " +
+            "JOIN cohort c ON uc.cohort_id = c.cohort_id " +
+            "JOIN cohort_program cp ON c.cohort_id = cp.cohort_id " +
+            "JOIN program p ON cp.program_id = p.program_id " +
+            "JOIN program_subconcept ps ON p.program_id = ps.program_id " +
+            "JOIN sub_concept sc ON ps.sub_concept_id = sc.sub_concept_id " +
+            "LEFT JOIN user_subconcept_completion usc ON u.user_id = usc.user_id AND usc.sub_concept_id = sc.sub_concept_id " +
+            "WHERE p.program_id = :programId " +
+            "GROUP BY c.cohort_name, u.user_id " +
+            "ORDER BY c.cohort_name, u.user_id",
+            nativeQuery = true)
+    List<Object[]> findCohortProgressByProgramOrg(@Param("programId") int programId);
+    //lines added by revankar
 
 }

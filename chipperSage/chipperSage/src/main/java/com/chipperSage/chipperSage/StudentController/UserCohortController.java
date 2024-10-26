@@ -26,6 +26,20 @@ public class UserCohortController {
     public List<Object[]> getStudentProgressByProgram(@RequestParam int programId) {
         return userCohortService.getStudentProgressByProgram(programId);
     }
+    //lines added by revankar
+    @GetMapping("/getCohortProgressByProgram")
+    public List<Object[]> getCohortProgressByProgram(@RequestParam int programId) {
+        return userCohortService.getCohortProgressByProgram(programId);
+    }
+    @GetMapping("/getInactiveCohortProgressByProgram")
+    public List<Object[]> getInactiveCohortProgressByProgram(@RequestParam int programId) {
+        return userCohortService.getInactiveCohortProgressByProgram(programId);
+    }
+    @GetMapping("/getCohortProgressByProgramOrg")
+    public List<Object[]> getCohortProgressByProgramOrg(@RequestParam int programId) {
+        return userCohortService.getCohortProgressByProgramOrg(programId);
+    }
+    //lines added by revankar <-------
 
 
 }
