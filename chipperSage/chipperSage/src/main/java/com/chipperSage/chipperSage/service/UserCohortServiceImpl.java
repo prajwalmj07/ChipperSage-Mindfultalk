@@ -23,6 +23,20 @@ public class UserCohortServiceImpl implements UserCohortService {
     public List<Object[]> getStudentProgressByProgram(int programId) {
         return userCohortRepository.findStudentProgressByProgram(programId);
     }
+    //lines added by revankar---->
+    @Override
+    public List<Object[]> getCohortProgressByProgram(int programId) {
+        return userCohortRepository.findCohortProgressByProgram(programId); // Ensure you call the correct repository method
+    }
+    @Override
+    public List<Object[]> getInactiveCohortProgressByProgram(int programId) {
+        return userCohortRepository.findInactiveCohortProgressByProgram(programId);
+    }
+    @Override
+    public List<Object[]> getCohortProgressByProgramOrg(int programId) {
+        return userCohortRepository.findCohortProgressByProgramOrg(programId);
+    }
+    //lines added by me <-----
 
 
 }
