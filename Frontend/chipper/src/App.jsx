@@ -1,6 +1,7 @@
 import './App.css'
 import Cohort_User from './components/Cohort_User'
 import SubConcept_Completion from './components/SubConcept_Completion'
+import CohortProgress from './components/CohortProgress'
 function App() {
   return (
     <>
@@ -10,6 +11,7 @@ function App() {
       </h1>
       <Cohort_User />
       <SubConcept_Completion/>
+      <CohortProgress />
       </div>
     </>
   )
