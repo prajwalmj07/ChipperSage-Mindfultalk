@@ -1,67 +1,6 @@
-// import axios from 'axios';
-// import { useEffect, useState } from 'react';
-// import '../styles/Cohort_User.css'
-
-// const Cohort_User = () => {
-//   const [studentScores, setStudentScores] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchStudentScores = async () => {
-//       try {
-//         const response = await axios.get('http://localhost:8080/userCohort/getStudentScoresByCohort', {
-//           params: {
-//             cohortId: 987
-//           }
-//         });
-//         setStudentScores(response.data); 
-//         setLoading(false);
-//       } catch (err) {
-//         setError(err);
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchStudentScores();
-//   }, []);
-
-//   if (loading) return <div>Loading...</div>;
-//   if (error) return <div>Error: {error.message}</div>;
-
-//   return (
-//     <div className='flex items-center justify-center'>
-//       {/* <h1>Student Scores</h1> */}
-//       <table className='border border-gray-900 my-4'>
-//         <thead>
-//           <tr>
-//             <th>ID</th>
-//             <th>Name</th>
-//             <th>Cohort</th>
-//             <th>Activity</th>
-//             <th>Score</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {studentScores.map((student) => (
-//             <tr key={student[0]}>
-//               <td>{student[0]}</td>
-//               <td>{student[1]}</td>
-//               <td>{student[2]}</td>
-//               <td>{student[3]}</td>
-//               <td>{student[4]}</td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// };
-
-// export default Cohort_User;
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { Bar, Pie } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import '../styles/Cohort_User.css';
 import {
   Chart as ChartJS,
@@ -71,50 +10,60 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement,
 } from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Cohort_User = () => {
   const [studentScores, setStudentScores] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchStudentScores = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/userCohort/getStudentScoresByCohort', {
-          params: {
-            cohortId: 987
-          }
-        });
-        setStudentScores(response.data); 
-        setLoading(false);
-      } catch (err) {
-        setError(err);
-        setLoading(false);
-      }
-    };
+  // Filter and sorting state variables
+  const [userId, setUserId] = useState('');
+  const [cohortId, setCohortId] = useState(987); // Default cohort ID as in the original code
+  const [sortedScores, setSortedScores] = useState([]); // Sorted data to display in the table
 
-    fetchStudentScores();
-  }, []);
+  // Fetch data based on filter inputs
+  const handleFilter = async () => {
+    if (!cohortId) {
+      console.error("Cohort ID is required for filtering.");
+      return;
+    }
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+    setLoading(true);
+    try {
+      const response = await axios.get('http://localhost:8080/userCohort/getStudentScoresByCohort', {
+        params: {
+          cohortId,
+          ...(userId && { userId }),
+        },
+      });
+      setStudentScores(response.data);
+      setSortedScores(response.data); // Initialize sorted data with fetched data
+      setLoading(false);
+    } catch (err) {
+      setError(err);
+      setLoading(false);
+    }
+  };
+
+  // Sort data by score in ascending order
+  const sortScoresAscending = () => {
+    const sorted = [...studentScores].sort((a, b) => a[4] - b[4]);
+    setSortedScores(sorted);
+  };
+
+  // Sort data by score in descending order
+  const sortScoresDescending = () => {
+    const sorted = [...studentScores].sort((a, b) => b[4] - a[4]);
+    setSortedScores(sorted);
+  };
 
   // Extract data for charts
-  const cohortDescription = studentScores.length > 0 ? studentScores[0][3] : ''; 
+  const cohortDescription = studentScores.length > 0 ? studentScores[0][3] : '';
   const names = studentScores.map((student) => `${student[1]} (ID: ${student[0]})`);
-  const scores = studentScores.map((student) => student[4]); // Score column
+  const scores = studentScores.map((student) => student[4]);
 
   // Data for the bar chart
   const barData = {
@@ -124,25 +73,6 @@ const Cohort_User = () => {
         label: 'Scores',
         data: scores,
         backgroundColor: 'rgba(113, 122, 255, 0.8)',
-      },
-  
-    ],
-  };
-
-  // Data for the pie chart
-  const pieData = {
-    labels: names,
-    datasets: [
-      {
-        label: 'Scores',
-        data: scores,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
-        ],
       },
     ],
   };
@@ -162,58 +92,98 @@ const Cohort_User = () => {
     },
   };
 
-  // Options for the pie chart
-  const pieOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Scores Distribution',
-      },
-    },
-  };
+  // Get the specific student data if `userId` is provided
+  const filteredStudent = userId
+    ? studentScores.find((student) => student[0].toString() === userId)
+    : null;
 
   return (
     <div className='flex items-center justify-center flex-col'>
       <h2 className='text-center my-4'>{cohortDescription}</h2>
 
-      {/* Bar chart */}
-      <div style={{ width: '400px' , height: '500px', margin: '0 auto' }}>
-        <Bar data={barData} options={barOptions} />
+      {/* Filter Inputs */}
+      <div className="filter-container">
+      <label htmlFor="">User ID:</label>
+        <input
+          type="text"
+          placeholder="User ID"
+          className='border border-slate-800 rounded-md px-3 py-2 mx-2'
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+        />
+        <label htmlFor="">Cohort ID:</label>
+        <input
+          type="text"
+          placeholder="Cohort ID"
+          className='border border-slate-800 rounded-md px-3 py-2 mx-2'
+          value={cohortId}
+          onChange={(e) => setCohortId(e.target.value)}
+        />
+        <button  onClick={handleFilter}>Show All</button>
+        <button className='ml-3 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded' onClick={sortScoresAscending}>Low to High</button>
+        <button className='ml-3 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded' onClick={sortScoresDescending}>High to Low</button>
       </div>
 
-      {/* Pie chart */}
-      {/* <div style={{ width: '400px', margin: '20px auto' }}>
-        <Pie data={pieData} options={pieOptions} />
-      </div> */}
+      {/* Display loading or error messages */}
+      {loading && <div>Loading...</div>}
+      {error && <div>Error: {error.message}</div>}
 
-      {/* Existing Table */}
-      {/* <table className='border border-gray-900 my-4'>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Cohort</th>
-            <th>Activity</th>
-            <th>Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          {studentScores.map((student) => (
-            <tr key={student[0]}>
-              <td>{student[0]}</td>
-              <td>{student[1]}</td>
-              <td>{student[2]}</td>
-              <td>{student[3]}</td>
-              <td>{student[4]}</td>
+      {/* Bar chart */}
+      {!loading && !error && studentScores.length > 0 && (
+        <div style={{ width: '400px', height: '500px', margin: '0 auto' }}>
+          <Bar data={barData} options={barOptions} />
+        </div>
+      )}
+
+      {/* Display filtered student details in a table */}
+      {filteredStudent && (
+        <div className="table-container">
+          <h3>Filtered Student Details</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Cohort</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{filteredStudent[0]}</td>
+                <td>{filteredStudent[1]}</td>
+                <td>{filteredStudent[3]}</td>
+                <td>{filteredStudent[4]}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Display sorted student scores in a table */}
+      <div className="table-container">
+        <h3>Student Scores</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Cohort</th>
+              <th>Score</th>
             </tr>
-          ))}
-        </tbody>
-      </table> */}
+          </thead>
+          <tbody>
+            {sortedScores.map((student) => (
+              <tr key={student[0]}>
+                <td>{student[0]}</td>
+                <td>{student[1]}</td>
+                <td>{student[3]}</td>
+                <td>{student[4]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
