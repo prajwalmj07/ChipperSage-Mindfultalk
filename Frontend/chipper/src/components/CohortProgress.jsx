@@ -136,7 +136,7 @@ const CohortProgress = () => {
           value={programId}
           onChange={(e) => setProgramId(e.target.value)}
         />
-        <button onClick={fetchCohortProgress}>Show Progress</button>
+        <button className="ml-3 bg-[#4CAF50] text-white font-semibold py-2 px-4 border border-transparent rounded hover:bg-[#45a049] transition-colors duration-300" onClick={fetchCohortProgress}>Show Progress</button>
       </div>
 
       {/* Bar chart */}

@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import '../styles/Cohort_User.css';
+import '../styles/CohortProgress.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -119,7 +120,7 @@ const Cohort_User = () => {
           value={cohortId}
           onChange={(e) => setCohortId(e.target.value)}
         />
-        <button  onClick={handleFilter}>Show All</button>
+        <button className="ml-3 bg-[#4CAF50] text-white font-semibold py-2 px-4 border border-transparent rounded hover:bg-[#45a049] transition-colors duration-300" onClick={handleFilter}>Show Progress</button>
         <button className='ml-3 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded' onClick={sortScoresAscending}>Low to High</button>
         <button className='ml-3 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded' onClick={sortScoresDescending}>High to Low</button>
       </div>

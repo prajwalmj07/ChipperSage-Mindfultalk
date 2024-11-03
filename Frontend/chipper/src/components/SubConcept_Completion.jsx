@@ -27,7 +27,6 @@ const SubConcept_Completion = () => {
   const programId = 1; // Example of parameter that you can pass to the API
 
   useEffect(() => {
-    // Define the async function inside useEffect
     const fetchData = async () => {
       try {
         const response = await axios.get(
@@ -127,7 +126,7 @@ const SubConcept_Completion = () => {
   };
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       <h2>Student Scores Charts</h2>
       <div style={{ width: "600px", margin: "30px" }}>
         <Bar data={barData} options={barOptions} />
